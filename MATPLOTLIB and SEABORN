@@ -1,0 +1,114 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import seaborn as sns
+netflix = pd.read_csv(r'C:\Users\Geetha\Downloads\dataset - netflix1 (4).csv')
+netflix.to_csv("datasetcsv")
+print(pd.read_csv("datasetcsv"))
+print(netflix.info())
+print(netflix.shape)
+
+print((netflix['country'].value_counts().head(40)))
+print((netflix['type'].value_counts().head(10)))
+print((netflix['director'].value_counts().head(10)))
+print((netflix['date_added'].value_counts().head(10)))
+print((netflix['release_year'].value_counts().head(20)))
+print((netflix['rating'].value_counts().head(20)))
+print(netflix['duration'].value_counts())
+print((netflix['listed_in'].value_counts().head(20)))
+
+###############
+#Making new DataFrame by using country and type features
+count_type = netflix.groupby(['country']).count()
+most_country = count_type['type'].to_frame().reset_index().sort_values(by='type', ascending=False)[:10]
+#Visualizing using seaborn
+plt.figure(figsize=(15,5))
+sns.set_context('paper', font_scale=1.2)
+sns.barplot(x='country', y='type', data=most_country)
+plt.ylabel('# of TV & Movie')
+plt.xlabel('Country')
+plt.show()
+#######################
+labels = ['Movie', 'TV show']
+size = netflix['type'].value_counts()
+colors = plt.cm.Wistia(np.linspace(0, 1, 2))
+explode = [0, 0.1]
+plt.rcParams['figure.figsize'] = (9, 9)
+plt.pie(size,labels=labels, colors = colors, explode = explode, shadow = True, startangle = 90)
+plt.title('Distribution of Type', fontsize = 25)
+plt.legend()
+plt.show()
+###########################
+netflix['rating'].value_counts().plot.pie(autopct='%1.1f%%',shadow=True,figsize=(10,8))
+plt.title('Rating')
+plt.show()
+############################
+plt.figure(figsize=(10,8))
+sns.countplot(x='rating',hue='type',data=netflix)
+plt.title('Relation between Type and Rating')
+plt.show()
+
+###############
+sns.countplot(netflix['type'])
+fig = plt.gcf()
+fig.set_size_inches(10,10)
+plt.title('Type')
+plt.show()
+
+#############
+sns.countplot(netflix['rating'])
+sns.countplot(netflix['rating']).set_xticklabels(sns.countplot(netflix['rating']).get_xticklabels(), rotation=90, ha="right")
+fig = plt.gcf()
+fig.set_size_inches(13,13)
+plt.title('Rating')
+plt.show()
+############
+#Visualizing using matplotlib
+plt.figure(figsize=(12,8))
+plt.title('# of TV & Movie in each decade', fontsize=18)
+sns.set_context("poster", font_scale = 0.8)
+sns.histplot(netflix['release_year'], bins=8, kde=True)
+plt.show()
+
+#####################
+#Making new dataframe to seperate TV & Movie
+df_TV = netflix[netflix['type']=='TV Show'].groupby('release_year').count()
+df_Movie = netflix[netflix['type']=='Movie'].groupby('release_year').count()
+plt.show()
+#Visualizing using matplotlib
+plt.figure(figsize=(12,8))
+sns.set_context("poster", font_scale = 0.8)
+sns.lineplot(data=df_TV['show_id'], sizes=10)
+sns.lineplot(data=df_Movie['show_id'])
+plt.ylabel('Count')
+plt.xlabel('Release Year')
+plt.legend(['TV', 'Movie'], fontsize='large')
+plt.title('TV vs Movie')
+plt.show()
+
+#################
+plt.subplots(figsize=(25,15))
+wordcloud = WordCloud(
+                          background_color='white',
+                          width=1920,
+                          height=1080
+                         ).generate(" ".join(netflix.country))
+plt.imshow(wordcloud)
+plt.axis('off')
+plt.savefig('country.png')
+plt.show()
+
+#############
+plt.subplots(figsize=(25,15))
+wordcloud = WordCloud(
+                          background_color='white',
+                          width=1920,
+                          height=1080
+                         ).generate(" ".join(netflix.listed_in))
+plt.imshow(wordcloud)
+plt.axis('off')
+plt.savefig('category.png')
+plt.show()
+
+
